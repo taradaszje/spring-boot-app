@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <title>Editing user</title>
+</head>
+<body>
+    <form th:action="@{../edit/__${user.id}__}" method="post" th:object="${user}">
+        <div class="form-row">
+            <div class="col">Username:
+                <input type="text" class="form-control" placeholder="Username" th:field="*{username}" th:value="${user.username}">
+                <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Error name</p>
+            </div>
+            <div class="col">Email:
+                <input type="text" class="form-control" placeholder="Email" th:field="*{email}" th:value="${user.email}">
+                <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error name</p>
+            </div>
+            <div class="col">New password:
+                <input type="password" class="form-control" th:field="*{password}" placeholder="New password">
+            </div>
+            <tbody th:each="role : ${roles}">
+            <div class="form-check">
+                <input th:if="${#sets.contains(user.roles, role)}" type="checkbox" class="form-check-input" th:id="${role.id}" th:field="*{roles}" th:value="${role.id}" checked>
+                <input th:unless="${#sets.contains(user.roles, role)}" type="checkbox" class="form-check-input" th:id="${role.id}" th:field="*{roles}" th:value="${role.id}">
+                <label class="form-check-label" th:for="${role.id}" th:text="${role.name}"></label>
+            </div>
+            </tbody>
+            <input type="submit" class="btn btn-primary" value="Edit">
+        </div>
+    </form>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <title>Create user</title>
+</head>
+<body>
+    <div>
+        <form th:action="@{/admin/add}" method="post" th:object="${user}">
+            <div class="form-row">
+                <div class="col">Username:
+                    <input type="text" class="form-control" placeholder="Username" th:field="*{username}" th:value="${user.username}">
+                    <p th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Error name</p>
+                </div>
+                <div class="col">Email:
+                    <input type="text" class="form-control" placeholder="Email" th:field="*{email}" th:value="${user.email}">
+                    <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Error name</p>
+                </div>
+                <div class="col">Password:
+                    <input type="password" class="form-control" th:field="*{password}" placeholder="Password">
+                    <p th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Error name</p>
+                </div>
+                <div class="col">Confirm password:
+                    <input type="password" class="form-control" th:field="*{matchingPassword}" placeholder="Confirm password">
+                    <div th:if="${#fields.hasGlobalErrors()}">
+                        <p th:each="err : ${#fields.globalErrors()}" th:text="${err}" >Error name</p>
+                    </div>
+                </div>
+                <tbody th:each="role : ${roles}">
+                    <div class="form-check">
+                        <input  type="checkbox" class="form-check-input" th:id="${role.id}" th:field="*{roles}" th:value="${role.id}">
+                        <label class="form-check-label" th:for="${role.id}" th:text="${role.name}"></label>
+                    </div>
+                </tbody>
+                <input type="submit" class="btn btn-primary" value="Create user">
+            </div>
+        </form>
+    </div>
+</body>
+</html>
