@@ -6,7 +6,7 @@ import com.jsularz.practice_app.models.User;
 import com.jsularz.practice_app.models.VerificationToken;
 
 public interface UserService {
-    User createNewUserAccount(UserCreateFormDto user) throws EmailExistsException;
-    VerificationToken getVerificationToken(String verificationToken);
-    void createVerificationToken(User user, String token);
+    User createNewUserAccount(final UserCreateFormDto user) throws EmailExistsException;
+    VerificationToken getVerificationToken(final String verificationToken);
+    void createVerificationToken(final User user, final String token);
 }

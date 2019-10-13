@@ -1,8 +1,8 @@
 package com.jsularz.practice_app.exceptions;
 
-public class TokenNotFoundException extends RuntimeException {
-    String message;
-    public TokenNotFoundException(String message) {
+public final class TokenNotFoundException extends RuntimeException {
+    private String message;
+    public TokenNotFoundException(final String message) {
         super(message);
     }
 }
