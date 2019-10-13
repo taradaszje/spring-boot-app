@@ -4,12 +4,15 @@ import com.jsularz.practice_app.dto.UserCreateFormDto;
 import com.jsularz.practice_app.dto.UserUpdateFormDto;
 import com.jsularz.practice_app.exceptions.EmailExistsException;
 import com.jsularz.practice_app.exceptions.TokenNotFoundException;
+import com.jsularz.practice_app.models.Role;
+import com.jsularz.practice_app.models.RoleType;
 import com.jsularz.practice_app.models.User;
 import com.jsularz.practice_app.models.VerificationToken;
-import com.jsularz.practice_app.repositories.UserRepository;
-import com.jsularz.practice_app.repositories.VerificationTokenRepository;
+import com.jsularz.practice_app.services.RoleService;
 import com.jsularz.practice_app.services.UserService;
-import com.jsularz.practice_app.userDetails.MyUserDetails;
+import com.jsularz.practice_app.services.repositories.UserRepository;
+import com.jsularz.practice_app.services.repositories.VerificationTokenRepository;
+import com.jsularz.practice_app.userDetails.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,6 +33,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private UserRepository userRepository;
 
     @Autowired
+    private RoleService roleService;
+
+    @Autowired
     private VerificationTokenRepository tokenRepository;
 
     // @Transactional
@@ -38,15 +44,16 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         if (emailExist(accountDto.getEmail())) {
             throw new EmailExistsException("There is an account with that email address: " + accountDto.getEmail());
         } else {
-           return this.userRepository.save(User.builder()
-                    .email(accountDto.getEmail())
-                    .password(encoder.encode(String.valueOf(accountDto.getPassword())).toCharArray())
-                    .username(accountDto.getUsername())
-                    .createdOn(LocalDateTime.now())
-                    .lastLogin(null)
-                    .roles(accountDto.getRoles())
-                    .status(false)
-                    .build());
+            final Role role = roleService.findRole(RoleType.SITE_USER);
+            final User user = new User();
+            user.setEmail(accountDto.getEmail());
+            user.setPassword(encoder.encode(String.valueOf(accountDto.getPassword())).toCharArray());
+            user.setCreatedOn(LocalDateTime.now());
+            user.setLastLogin(null);
+            user.setUsername(accountDto.getUsername());
+            user.setStatus(false);
+            user.addRole(role);
+            return userRepository.save(user);
         }
     }
     //todo wyjebać buildera, stworzyć metode budującą z dto
@@ -108,7 +115,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(final String email) {
-        return new MyUserDetails(userRepository.findByEmail(email).orElseThrow(
+        return new UserDetailsImpl(userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException("User not found"))
         );
 

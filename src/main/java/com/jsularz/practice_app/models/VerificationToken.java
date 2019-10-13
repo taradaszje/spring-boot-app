@@ -24,14 +24,14 @@ public class VerificationToken {
 
     private LocalDateTime expiryDate;
 
-    public VerificationToken(String token, User user) {
+    public VerificationToken(final String token, final User user) {
         this.token = token;
         this.setUser(user);
         this.expiryDate = calculateExpiryDate(EXPIRATION);
     }
 
-    private LocalDateTime calculateExpiryDate(long expiryTimeInMinutes) {
-        LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(expiryTimeInMinutes);
+    private LocalDateTime calculateExpiryDate(final long expiryTimeInMinutes) {
+        final LocalDateTime localDateTime = LocalDateTime.now().plusMinutes(expiryTimeInMinutes);
         return localDateTime;
     }
 }

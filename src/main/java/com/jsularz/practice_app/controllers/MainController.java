@@ -64,8 +64,8 @@ public class MainController {
 
 
     @PostMapping("/logout")
-    private String logoutPage(HttpServletRequest request, HttpServletResponse response) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    private String logoutPage(final HttpServletRequest request, final HttpServletResponse response) {
+        final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
@@ -73,7 +73,7 @@ public class MainController {
     }
 
     @GetMapping("/register")
-    private String getRegistration(Model model) {
+    private String getRegistration(final Model model) {
         if (!model.containsAttribute("user")) {
             model.addAttribute("user", new UserCreateFormDto());
         }
@@ -108,15 +108,15 @@ public class MainController {
     }
 
     @GetMapping("/registrationConfirm")
-    private String confirmRegistration(Model model, @RequestParam("token") String token) {
+    private String confirmRegistration(final Model model, @RequestParam("token") final String token) {
 
-        VerificationToken verificationToken = userService.getVerificationToken(token);
+        final VerificationToken verificationToken = userService.getVerificationToken(token);
         if (verificationToken == null) {
             model.addAttribute("message", "Token null");
             return "redirect:/badUser";
         }
-        User user = verificationToken.getUser();
-        LocalDateTime todayTime = LocalDateTime.now();
+        final User user = verificationToken.getUser();
+        final LocalDateTime todayTime = LocalDateTime.now();
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.from(todayTime))) {
             model.addAttribute("message", "Token expired");
             return "redirect:/badUser";

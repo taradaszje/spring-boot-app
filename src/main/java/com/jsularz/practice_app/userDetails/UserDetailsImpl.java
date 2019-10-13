@@ -5,14 +5,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
-public class MyUserDetails implements UserDetails {
+public class UserDetailsImpl implements UserDetails {
 
     private User user;
 
-    public MyUserDetails(User user) {
+    public UserDetailsImpl(final User user) {
         this.user = user;
     }
 
@@ -23,7 +24,7 @@ public class MyUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return user.getPassword().toString();
+        return Arrays.toString(user.getPassword());
     }
 
     @Override
@@ -52,7 +53,7 @@ public class MyUserDetails implements UserDetails {
     }
 
     private Collection<GrantedAuthority> convertSet() {
-        Collection<GrantedAuthority> collection = new HashSet<>();
+        final Collection<GrantedAuthority> collection = new HashSet<>();
         this.user.getRoles().forEach(role -> collection.add(new SimpleGrantedAuthority(role.getName())));
         return collection;
     }

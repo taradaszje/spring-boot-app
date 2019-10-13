@@ -1,12 +1,14 @@
 package com.jsularz.practice_app.registrationUtill;
 
 import com.jsularz.practice_app.models.User;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.context.ApplicationEvent;
 
 import java.util.Locale;
 
-@Data
+@Getter
+@Setter
 public class RegistrationCompleteEvent extends ApplicationEvent {
 
     private static final long serialVersionUID = 1L;

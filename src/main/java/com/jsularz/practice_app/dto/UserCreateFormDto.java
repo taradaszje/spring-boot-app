@@ -21,7 +21,6 @@ public class UserCreateFormDto {
 
     private Long id;
 
-
     @NotBlank(message = "Can't be blank")
     @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
     private String username;
@@ -37,7 +36,7 @@ public class UserCreateFormDto {
 
     private Set<Role> roles = new HashSet<>();
 
-    public UserCreateFormDto(User user) {
+    public UserCreateFormDto(final User user) {
         this.setId(user.getId());
         this.setEmail(user.getEmail());
         this.setUsername(user.getUsername());

@@ -1,4 +1,4 @@
-package com.jsularz.practice_app.repositories;
+package com.jsularz.practice_app.services.repositories;
 
 import com.jsularz.practice_app.models.User;
 import org.springframework.data.repository.CrudRepository;

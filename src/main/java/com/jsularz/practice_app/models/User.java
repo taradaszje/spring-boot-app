@@ -3,6 +3,7 @@ package com.jsularz.practice_app.models;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
@@ -16,6 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Entity
 @Table(name = "users") // opcjonalne, hiberante defaultowo
+@EqualsAndHashCode(of = "email")
 public class User {   // bierze nazwe tabeli tak jak klasy
 
     @Id
@@ -32,11 +34,24 @@ public class User {   // bierze nazwe tabeli tak jak klasy
     @OneToOne(mappedBy = "user")
     private VerificationToken verificationToken;
 
-    @ManyToMany(cascade = CascadeType.PERSIST)
+    @ManyToMany(cascade = {
+            CascadeType.PERSIST,
+            CascadeType.MERGE
+    })
     @JoinTable(
             name = "users_roles",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")}
     )
     private Set<Role> roles = new HashSet<>();
+
+    public void addRole(final Role role){
+        roles.add(role);
+        role.getUsersSet().add(this);
+    }
+
+    public void removeRole(final Role role){
+        roles.remove(role);
+        role.getUsersSet().remove(this);
+    }
 }
