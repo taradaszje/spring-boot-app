@@ -5,13 +5,19 @@ import com.jsularz.practice_app.dto.UserUpdateFormDto;
 import com.jsularz.practice_app.exceptions.EmailExistsException;
 import com.jsularz.practice_app.exceptions.UserNotExistsException;
 import com.jsularz.practice_app.models.Role;
-import com.jsularz.practice_app.services.impl.RoleServiceImpl;
-import com.jsularz.practice_app.services.impl.UserServiceImpl;
+import com.jsularz.practice_app.services.RoleService;
+import com.jsularz.practice_app.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.validation.Valid;
@@ -23,13 +29,14 @@ public class AdminSiteController {
 
 
     @Autowired
-    private UserServiceImpl userService; //czy tu powininem użyć interfejsu zamiast klasy?
+    private UserService userService;
+
     @Autowired
-    private RoleServiceImpl roleService;
+    private RoleService roleService;
 
 
     @GetMapping("/add")
-    private String showRegistrationForm(Model model) {
+    private String showRegistrationForm(final Model model) {
         if (!model.containsAttribute("user")) {
             model.addAttribute("user", new UserCreateFormDto());
         }
@@ -38,8 +45,8 @@ public class AdminSiteController {
     }
 
     @PostMapping("/add")
-    private String registerUserAccount(@ModelAttribute("user") @Valid UserCreateFormDto accountDto,@ModelAttribute("roles") HashSet<Role> roles,
-                                       BindingResult result, RedirectAttributes redirectAttributes) {
+    private String registerUserAccount(@ModelAttribute("user") @Valid final UserCreateFormDto accountDto,@ModelAttribute("roles") final HashSet<Role> roles,
+                                       final BindingResult result, final RedirectAttributes redirectAttributes) {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
             redirectAttributes.addFlashAttribute("user", accountDto);
@@ -55,13 +62,13 @@ public class AdminSiteController {
     }
 
     @GetMapping("/admin")
-    private String getUsers(Model model) {
+    private String getUsers(final Model model) {
         model.addAttribute("users", userService.findAll());
         return "admin/admin";
     }
 
-    @GetMapping("/delete/{id}")
-    private String deleteUser(@PathVariable("id") Long id) {
+    @DeleteMapping("/delete/{id}")
+    private String deleteUser(@PathVariable("id")final Long id) {
         try {
             userService.deleteById(id);
         } catch (UserNotExistsException e) {
@@ -70,8 +77,9 @@ public class AdminSiteController {
         return "redirect:/admin/admin";
     }
 
-    @PostMapping("/edit/{id}")
-    private String updateUser(@Valid @ModelAttribute("user") UserUpdateFormDto user, BindingResult result, RedirectAttributes redirectAttributes) {
+    @PutMapping("/edit/{id}")
+    private String updateUser(@Valid @ModelAttribute("user") final UserUpdateFormDto user, final BindingResult result,
+                              final RedirectAttributes redirectAttributes) {
         System.out.println(result.getFieldErrors());
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
@@ -83,9 +91,9 @@ public class AdminSiteController {
     }
 
     @GetMapping("/edit/{id}")
-    private String transferUserToEdit(@PathVariable("id") Long id, Model model) {
-        UserCreateFormDto user = new UserCreateFormDto(userService.findById(id));
-        Iterable<Role> roles = roleService.findAll();
+    private String transferUserToEdit(@PathVariable("id")final Long id, final Model model) {
+        final UserCreateFormDto user = new UserCreateFormDto(userService.findById(id));
+        final Iterable<Role> roles = roleService.findAll();
         if (!model.containsAttribute("user")) {
             model.addAttribute("user", user);
             model.addAttribute("roles", roles);

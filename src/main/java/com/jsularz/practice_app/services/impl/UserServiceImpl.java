@@ -4,6 +4,7 @@ import com.jsularz.practice_app.dto.UserCreateFormDto;
 import com.jsularz.practice_app.dto.UserUpdateFormDto;
 import com.jsularz.practice_app.exceptions.EmailExistsException;
 import com.jsularz.practice_app.exceptions.TokenNotFoundException;
+import com.jsularz.practice_app.exceptions.UserNotExistsException;
 import com.jsularz.practice_app.models.Role;
 import com.jsularz.practice_app.models.RoleType;
 import com.jsularz.practice_app.models.User;
@@ -21,7 +22,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -38,10 +38,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     private VerificationTokenRepository tokenRepository;
 
-    // @Transactional
     @Override
     public User createNewUserAccount(final UserCreateFormDto accountDto) throws EmailExistsException {
-        if (emailExist(accountDto.getEmail())) {
+        if (checkEmailExist(accountDto.getEmail())) {
             throw new EmailExistsException("There is an account with that email address: " + accountDto.getEmail());
         } else {
             final Role role = roleService.findRole(RoleType.SITE_USER);
@@ -56,7 +55,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return userRepository.save(user);
         }
     }
-    //todo wyjebać buildera, stworzyć metode budującą z dto
+    //todo wyjebać buildera, stworzyć metode budującą z dto, stworzyć i serwis tokenu
     @Override
     public VerificationToken getVerificationToken(final String verificationToken) {
         return tokenRepository.findByToken(verificationToken).orElseThrow(() -> new TokenNotFoundException("Token not found" + verificationToken));
@@ -68,37 +67,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         tokenRepository.save(myToken);
     }
 
-    private Optional<User> findByEmail(final String email) {
-        return this.userRepository.findByEmail(email);
-    }
-
-    public void setLoginTime(final String email){findByEmail(email).ifPresent(user->{
-            user.setLastLogin(LocalDateTime.now());
-            userRepository.save(user);
-            });
-    }
-
-    public void saveRegisteredUser(final User user){
-        this.userRepository.save(user);
-    }
-
-    public boolean emailExist(final String email) {
-        return userRepository.findByEmail(email).isPresent();
-    }
-
+    @Override
     public Iterable<User> findAll() {
         return this.userRepository.findAll();
     }
 
-    public void deleteById(final Long id) {
-        this.userRepository.deleteById(id);
-    }
-
-    //to jest ok?
-    public User findById(final Long id) {
-        return this.userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found with id : " + id));
-    }
-
+    @Override
     public void updateUser(final Long id, final UserUpdateFormDto userUpdateFormDto) {
         userRepository.findById(id).ifPresent(user -> {
             user.setEmail(userUpdateFormDto.getEmail());
@@ -118,6 +92,36 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return new UserDetailsImpl(userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException("User not found"))
         );
+    }
 
+    @Override
+    public void deleteById(final Long id) {
+        this.userRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean checkEmailExist(final String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+
+    @Override
+    public void saveUser(final User user){
+        this.userRepository.save(user);
+    }
+
+    @Override
+    public User findById(final Long id) {
+        return this.userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException("User not found with id : " + id));
+    }
+
+    @Override
+    public User findByEmail(final String email) {
+        return this.userRepository.findByEmail(email).orElseThrow(()-> new UserNotExistsException("User with email "+ email +" not found."));
+    }
+
+    public void setLoginTime(final String email){
+        final User found = findByEmail(email);
+        found.setLastLogin(LocalDateTime.now());
+            userRepository.save(found);
     }
 }

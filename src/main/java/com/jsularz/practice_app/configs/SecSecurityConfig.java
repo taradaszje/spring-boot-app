@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Value("${spring.queries.users-query}")
     private String usersQuery;
@@ -39,20 +39,19 @@ public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/admin/**").hasAuthority("SITE_USER")
-                .antMatchers("/user/**").hasAuthority("SITE_USER")
-                .antMatchers("/login*").permitAll()
-                .antMatchers("/register").anonymous()
-                .antMatchers("/registrationConfirm").anonymous()
+                .antMatchers("/admin/**").hasAuthority("ADMIN_USER")
+                .antMatchers("/login","/register","/registrationConfirm").permitAll()
+                .antMatchers("/home/**").hasAuthority("SITE_USER")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/admin/admin")
+                .successHandler(new AuthenticationSuccessHandlerImpl())
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .failureUrl("/login?error")
+                .permitAll()
                 .and()
                 .logout()
                 .logoutRequestMatcher(

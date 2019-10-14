@@ -21,8 +21,8 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "roles")
 @EqualsAndHashCode
+@Table(name = "roles")
 public class Role {
 
     @Id
@@ -45,5 +45,8 @@ public class Role {
     protected Set<User> getUsersSet(){
         return this.users;
     }
+
+    public Role(final RoleType roleType){
+        this.name = roleType.name();
+    }
 }
-//todo equals and hashcode and in users

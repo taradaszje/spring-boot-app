@@ -6,7 +6,7 @@ import com.jsularz.practice_app.exceptions.UserNotExistsException;
 import com.jsularz.practice_app.models.User;
 import com.jsularz.practice_app.models.VerificationToken;
 import com.jsularz.practice_app.registrationUtill.RegistrationCompleteEvent;
-import com.jsularz.practice_app.services.impl.UserServiceImpl;
+import com.jsularz.practice_app.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
@@ -33,13 +33,13 @@ import java.time.LocalDateTime;
 public class MainController {
 
     @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     @GetMapping("/login")
-    private String showLoginForm(Model model) {
+    private String showLoginForm(final Model model) {
         if (!model.containsAttribute("user")) {
             model.addAttribute("user", new UserLoginFormDto());
         }
@@ -51,16 +51,15 @@ public class MainController {
         return "access-denied";
     }
 
-    @PostMapping("/login")
-    private String sendLoginFormData(@ModelAttribute @Valid UserLoginFormDto user, BindingResult result,
-                                     RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
-            redirectAttributes.addFlashAttribute("user", user);
-            return "redirect:/login";
-        }
-        return "redirect:/admin/admin";
-    }
+//    @PostMapping("/login")
+//    private String sendLoginFormData(@ModelAttribute @Valid final UserLoginFormDto user, final BindingResult result,
+//                                     final RedirectAttributes redirectAttributes) {
+//        if (result.hasErrors()) {
+//            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+//            redirectAttributes.addFlashAttribute("user", user);
+//        }
+//        return "redirect:/login";
+//    }
 
 
     @PostMapping("/logout")
@@ -88,13 +87,13 @@ public class MainController {
             redirectAttributes.addFlashAttribute("user", user);
             return "redirect:/register";
         }
-        if (userService.emailExist(user.getEmail())) {
+        if (userService.checkEmailExist(user.getEmail())) {
             return "redirect:/register?exist";
         }
         final User registered = userService.createNewUserAccount(user);
 
         try {
-            String appUrl = webRequest.getContextPath();
+            final String appUrl = webRequest.getContextPath();
             eventPublisher.publishEvent(new RegistrationCompleteEvent(registered, webRequest.getLocale(), appUrl));
             return "redirect:/login?success";
         } catch (UserNotExistsException e) {
@@ -107,8 +106,14 @@ public class MainController {
         return "badUser";
     }
 
+    @GetMapping("/user/home")
+    private String getUserHome() {
+        return "user/home";
+    }
+
+
     @GetMapping("/registrationConfirm")
-    private String confirmRegistration(final Model model, @RequestParam("token") final String token) {
+    private String confirmRegistration(final Model model, @RequestParam("token")final String token) {
 
         final VerificationToken verificationToken = userService.getVerificationToken(token);
         if (verificationToken == null) {
@@ -122,7 +127,7 @@ public class MainController {
             return "redirect:/badUser";
         }
         user.setStatus(true);
-        userService.saveRegisteredUser(user);
+        userService.saveUser(user);
         return "redirect:/login?confirmed";
     }
 }
