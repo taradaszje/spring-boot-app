@@ -13,8 +13,10 @@ public interface UserService {
     Iterable<User> findAll();
     User findById(final Long id);
     void updateUser(final Long id, final UserUpdateFormDto updateForm);
+    void updateUser(final User user);
     void deleteById(final Long id);
     boolean checkEmailExist(final String email);
     void saveUser(final User user);
     User findByEmail(final String email);
 }
+// todo move token methods to proper service

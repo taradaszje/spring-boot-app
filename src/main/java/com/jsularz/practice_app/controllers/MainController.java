@@ -9,6 +9,7 @@ import com.jsularz.practice_app.registrationUtill.RegistrationCompleteEvent;
 import com.jsularz.practice_app.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -79,8 +81,9 @@ public class MainController {
         return "registration";
     }
 
-    @PostMapping("/register")
-    private String postRegistration(@ModelAttribute @Valid final  UserCreateFormDto user, final BindingResult result,
+    @PostMapping(value = "/register")
+    @ResponseStatus(HttpStatus.CREATED)
+    private String postRegistration( @ModelAttribute @Valid final  UserCreateFormDto user, final BindingResult result,
                                     final RedirectAttributes redirectAttributes, final WebRequest webRequest) {
         if (result.hasErrors()) {
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);

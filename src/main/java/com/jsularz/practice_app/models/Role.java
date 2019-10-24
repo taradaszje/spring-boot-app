@@ -42,11 +42,13 @@ public class Role {
     public Set<User> getUsers(){
         return Collections.unmodifiableSet(users);
     }
+
     protected Set<User> getUsersSet(){
         return this.users;
     }
 
     public Role(final RoleType roleType){
         this.name = roleType.name();
+        this.description = roleType.getDescription();
     }
 }

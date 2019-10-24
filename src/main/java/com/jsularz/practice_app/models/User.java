@@ -21,8 +21,7 @@ import java.util.Set;
 public class User {   // bierze nazwe tabeli tak jak klasy
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
-    @SequenceGenerator(initialValue = 4, name = "seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
     private String username;
     private char[] password;
@@ -46,12 +45,16 @@ public class User {   // bierze nazwe tabeli tak jak klasy
     private Set<Role> roles = new HashSet<>();
 
     public void addRole(final Role role){
-        roles.add(role);
-        role.getUsersSet().add(this);
+        if(role != null){
+            roles.add(role);
+            role.getUsersSet().add(this);
+        }
     }
 
     public void removeRole(final Role role){
-        roles.remove(role);
-        role.getUsersSet().remove(this);
+        if(role != null) {
+            roles.remove(role);
+            role.getUsersSet().remove(this);
+        }
     }
 }

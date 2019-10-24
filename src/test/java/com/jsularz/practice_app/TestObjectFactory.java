@@ -1,5 +1,8 @@
 package com.jsularz.practice_app;
 
+import com.jsularz.practice_app.dto.UserCreateFormDto;
+import com.jsularz.practice_app.models.Role;
+import com.jsularz.practice_app.models.RoleType;
 import com.jsularz.practice_app.models.User;
 
 import java.time.LocalDateTime;
@@ -24,4 +27,29 @@ public class TestObjectFactory {
         return user;
     }
 
+    public static Role createRole(final RoleType roleType){
+        return new Role(roleType);
+    }
+
+    public static UserCreateFormDto createUserCreateForm() {
+        final UserCreateFormDto userCreateFormDto = new UserCreateFormDto();
+        userCreateFormDto.setEmail(randomAlphabetic(7) + "@"+"gmail.com");
+        userCreateFormDto.setPassword(randomAlphabetic(10).toCharArray());
+        userCreateFormDto.setUsername(randomAlphabetic(10));
+        userCreateFormDto.setMatchingPassword(userCreateFormDto.getPassword());
+        return userCreateFormDto;
+    }
+
+    public static User createUser(final UserCreateFormDto form){
+        final User user = new User();
+        user.setLastLogin(LocalDateTime.now());
+        user.setVerificationToken(null);
+        user.setStatus(new Random().nextBoolean());
+        user.setUsername(randomAlphabetic(8));
+        user.setCreatedOn(LocalDateTime.now());
+        user.setPassword(random(5).toCharArray());
+        user.setEmail(randomAlphabetic(10));
+        user.setRoles(Collections.emptySet());
+        return user;
+    }
 }

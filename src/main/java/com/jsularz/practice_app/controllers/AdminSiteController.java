@@ -55,16 +55,16 @@ public class AdminSiteController {
         }
         try {
             userService.createNewUserAccount(accountDto);
-            return "redirect:/admin/admin";
+            return "redirect:/admin/console";
         } catch (EmailExistsException e) {
             return "/admin/error";
         }
     }
 
-    @GetMapping("/admin")
+    @GetMapping("/console")
     private String getUsers(final Model model) {
         model.addAttribute("users", userService.findAll());
-        return "admin/admin";
+        return "admin/console";
     }
 
     @DeleteMapping("/delete/{id}")
@@ -74,7 +74,7 @@ public class AdminSiteController {
         } catch (UserNotExistsException e) {
             return "redirect:/admin/error";
         }
-        return "redirect:/admin/admin";
+        return "redirect:/admin/console";
     }
 
     @PutMapping("/edit/{id}")
@@ -87,7 +87,7 @@ public class AdminSiteController {
             return "redirect:/admin/edit/" + user.getId();
         }
         this.userService.updateUser(user.getId(), user);
-        return "redirect:/admin/admin";
+        return "redirect:/admin/console";
     }
 
     @GetMapping("/edit/{id}")

@@ -22,6 +22,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -46,7 +47,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             final Role role = roleService.findRole(RoleType.SITE_USER);
             final User user = new User();
             user.setEmail(accountDto.getEmail());
-            user.setPassword(encoder.encode(String.valueOf(accountDto.getPassword())).toCharArray());
+            user.setPassword(encoder.encode(Arrays.toString(accountDto.getPassword())).toCharArray());
             user.setCreatedOn(LocalDateTime.now());
             user.setLastLogin(null);
             user.setUsername(accountDto.getUsername());
@@ -55,7 +56,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             return userRepository.save(user);
         }
     }
-    //todo wyjebać buildera, stworzyć metode budującą z dto, stworzyć i serwis tokenu
+
     @Override
     public VerificationToken getVerificationToken(final String verificationToken) {
         return tokenRepository.findByToken(verificationToken).orElseThrow(() -> new TokenNotFoundException("Token not found" + verificationToken));
@@ -88,6 +89,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
+    public void updateUser(final User user) {
+        userRepository.save(user);
+    }
+
+    @Override
     public UserDetails loadUserByUsername(final String email) {
         return new UserDetailsImpl(userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException("User not found"))
@@ -117,11 +123,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User findByEmail(final String email) {
         return this.userRepository.findByEmail(email).orElseThrow(()-> new UserNotExistsException("User with email "+ email +" not found."));
-    }
-
-    public void setLoginTime(final String email){
-        final User found = findByEmail(email);
-        found.setLastLogin(LocalDateTime.now());
-            userRepository.save(found);
     }
 }
