@@ -16,7 +16,7 @@
         <div class="col">
             <h1 >form</h1>
             <form th:action="@{register}" th:object="${user}" method="POST" enctype="utf8">
-                <div th:if="${param.exist}">
+                <div th:if="${param.exists}">
                     <p > Email exist. Did you forget the password?</p>
                 </div>
                 <div>

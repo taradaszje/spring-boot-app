@@ -19,7 +19,6 @@ public class TestObjectFactory {
         user.setLastLogin(LocalDateTime.now());
         user.setVerificationToken(null);
         user.setStatus(new Random().nextBoolean());
-        user.setUsername(randomAlphabetic(8));
         user.setCreatedOn(LocalDateTime.now());
         user.setPassword(random(5).toCharArray());
         user.setEmail(randomAlphabetic(10));
@@ -35,7 +34,6 @@ public class TestObjectFactory {
         final UserCreateFormDto userCreateFormDto = new UserCreateFormDto();
         userCreateFormDto.setEmail(randomAlphabetic(7) + "@"+"gmail.com");
         userCreateFormDto.setPassword(randomAlphabetic(10).toCharArray());
-        userCreateFormDto.setUsername(randomAlphabetic(10));
         userCreateFormDto.setMatchingPassword(userCreateFormDto.getPassword());
         return userCreateFormDto;
     }
@@ -45,7 +43,6 @@ public class TestObjectFactory {
         user.setLastLogin(LocalDateTime.now());
         user.setVerificationToken(null);
         user.setStatus(new Random().nextBoolean());
-        user.setUsername(randomAlphabetic(8));
         user.setCreatedOn(LocalDateTime.now());
         user.setPassword(random(5).toCharArray());
         user.setEmail(randomAlphabetic(10));

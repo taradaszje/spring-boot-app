@@ -49,7 +49,6 @@ public class UserServiceTest {
         final User user = new User();
         user.setEmail(userCreateFormDto.getEmail());
         user.setPassword(userCreateFormDto.getPassword());
-        user.setUsername(userCreateFormDto.getUsername());
         given(encoder.encode(Arrays.toString(userCreateFormDto.getPassword())))
                 .willReturn(Arrays.toString(user.getPassword()));
         given(roleService.findRole(RoleType.SITE_USER)).willReturn(role);
@@ -75,8 +74,6 @@ public class UserServiceTest {
 
         final User user = new User();
         user.setEmail(userCreateFormDto.getEmail());
-        user.setPassword(userCreateFormDto.getPassword());
-        user.setUsername(userCreateFormDto.getUsername());
         given(encoder.encode(Arrays.toString(userCreateFormDto.getPassword())))
                 .willReturn(Arrays.toString(user.getPassword()));
         given(roleService.findRole(RoleType.SITE_USER)).willReturn(role);

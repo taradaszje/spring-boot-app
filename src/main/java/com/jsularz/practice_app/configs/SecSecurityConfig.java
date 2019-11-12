@@ -8,7 +8,6 @@ import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -46,7 +45,7 @@ public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .authorizeRequests()
                 .antMatchers("/admin/**").hasAuthority("ADMIN_USER")
-                .antMatchers("/login","/register","/registrationConfirm", "/game").permitAll()
+                .antMatchers("/login","/register","/registrationConfirm", "/game", "/resources/static/**").permitAll()
                 .antMatchers("/home/**").hasAuthority("SITE_USER")
                 .anyRequest().authenticated()
                 .and()
@@ -60,10 +59,10 @@ public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
                 .permitAll()
                 .and()
                 .logout()
-                .logoutRequestMatcher(
-                        new AntPathRequestMatcher("/login?logout")
-                )
+                .deleteCookies("JSESSIONID","csrftoken")
+                .invalidateHttpSession(true)
                 .logoutSuccessUrl("/login")
+                .logoutSuccessHandler(new LogoutSuccessHandlerImpl()).logoutUrl("/logout")
                 .and()
                 .exceptionHandling().accessDeniedPage("/access-denied");
     }

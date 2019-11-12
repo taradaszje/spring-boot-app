@@ -9,19 +9,18 @@ import com.jsularz.practice_app.registrationUtill.RegistrationCompleteEvent;
 import com.jsularz.practice_app.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -53,16 +52,6 @@ public class MainController {
         return "access-denied";
     }
 
-//    @PostMapping("/login")
-//    private String sendLoginFormData(@ModelAttribute @Valid final UserLoginFormDto user, final BindingResult result,
-//                                     final RedirectAttributes redirectAttributes) {
-//        if (result.hasErrors()) {
-//            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
-//            redirectAttributes.addFlashAttribute("user", user);
-//        }
-//        return "redirect:/login";
-//    }
-
 
     @PostMapping("/logout")
     private String logoutPage(final HttpServletRequest request, final HttpServletResponse response) {
@@ -70,7 +59,7 @@ public class MainController {
         if (auth != null) {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
-        return "redirect:/login?logout";//You can redirect wherever you want, but generally it's a good practice to show login screen again.
+        return "redirect:/login?success";
     }
 
     @GetMapping("/register")
@@ -82,24 +71,26 @@ public class MainController {
     }
 
     @PostMapping(value = "/register")
-    @ResponseStatus(HttpStatus.CREATED)
     private String postRegistration( @ModelAttribute @Valid final  UserCreateFormDto user, final BindingResult result,
                                     final RedirectAttributes redirectAttributes, final WebRequest webRequest) {
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
-            redirectAttributes.addFlashAttribute("user", user);
-            return "redirect:/register";
-        }
-        if (userService.checkEmailExist(user.getEmail())) {
-            return "redirect:/register?exist";
-        }
-        final User registered = userService.createNewUserAccount(user);
-
         try {
+            if (result.hasErrors()) {
+                redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+                redirectAttributes.addFlashAttribute("user", user);
+                throw new BindException(result);
+            }
+            if (userService.checkEmailExist(user.getEmail())) {
+                throw new UserNotExistsException("User with email: "+ user.getEmail()+" already exists.");
+            }
+            final User registered = userService.createNewUserAccount(user);
             final String appUrl = webRequest.getContextPath();
-            eventPublisher.publishEvent(new RegistrationCompleteEvent(registered, webRequest.getLocale(), appUrl));
+            eventPublisher.publishEvent(
+                    new RegistrationCompleteEvent(registered, webRequest.getLocale(), appUrl));
             return "redirect:/login?success";
-        } catch (UserNotExistsException e) {
+
+        } catch (UserNotExistsException error) {
+            return "redirect:/register?exists";
+        } catch (BindException error) {
             return "redirect:/register";
         }
     }
@@ -132,5 +123,10 @@ public class MainController {
         user.setStatus(true);
         userService.saveUser(user);
         return "redirect:/login?confirmed";
+    }
+
+    @GetMapping("/user/offer")
+    public String offerView(){
+        return "user/offer";
     }
 }

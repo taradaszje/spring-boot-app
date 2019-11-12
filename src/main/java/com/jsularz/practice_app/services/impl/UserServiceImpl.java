@@ -50,7 +50,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             user.setPassword(encoder.encode(Arrays.toString(accountDto.getPassword())).toCharArray());
             user.setCreatedOn(LocalDateTime.now());
             user.setLastLogin(null);
-            user.setUsername(accountDto.getUsername());
             user.setStatus(false);
             user.addRole(role);
             return userRepository.save(user);
@@ -78,7 +77,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         userRepository.findById(id).ifPresent(user -> {
             user.setEmail(userUpdateFormDto.getEmail());
             user.setRoles(userUpdateFormDto.getRoles());
-            user.setUsername(userUpdateFormDto.getUsername());
             if(userUpdateFormDto.getPassword().length == 0){
                 user.setPassword(user.getPassword());
             }else{

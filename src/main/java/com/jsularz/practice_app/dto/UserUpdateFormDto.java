@@ -8,7 +8,6 @@ import lombok.Setter;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -18,11 +17,6 @@ import java.util.Set;
 public class UserUpdateFormDto {
 
     private Long id;
-
-    @NotNull(message = "Can't be null")
-    @NotEmpty(message = "Can't be empty")
-    @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
-    private String username;
 
     private char[] password;
 

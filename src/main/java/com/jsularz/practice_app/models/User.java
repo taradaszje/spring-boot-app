@@ -2,28 +2,38 @@ package com.jsularz.practice_app.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Builder
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @Entity
-@Table(name = "users") // opcjonalne, hiberante defaultowo
+@Table(name = "users")
 @EqualsAndHashCode(of = "email")
-public class User {   // bierze nazwe tabeli tak jak klasy
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
-    private String username;
     private char[] password;
     private String email;
     private LocalDateTime createdOn;
