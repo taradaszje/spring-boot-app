@@ -35,12 +35,12 @@ public class RegistrationListener implements ApplicationListener<RegistrationCom
     private SimpleMailMessage createConfirmationEmail(final RegistrationCompleteEvent event, final User user, final String token) {
         final String recipientAddress = user.getEmail();
         final String subject = "Registration Confirmation";
-        final String confirmationUrl = "http://" + event.getAppUrl() + "/registrationConfirm?token=" + token;
+        final String confirmationUrl = event.getAppUrl() + "/registrationConfirm?token=" + token;
         final SimpleMailMessage email = new SimpleMailMessage();
         email.setFrom("solsoftest@gmail.com");
         email.setTo(recipientAddress);
         email.setSubject(subject);
-        email.setText( "localhost:8080" + confirmationUrl);
+        email.setText( "http://localhost:8080" + confirmationUrl);
         return email;
     }
 }

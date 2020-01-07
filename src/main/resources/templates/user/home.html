@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="jobOffers.js"></script>
+    <title>Home</title>
+</head>
+<body>
+<nav class="navbar  navbar-expand-lg sticky-top navbar-light bg-light">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-item nav-link active" href="#">Start</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-item nav-link" href="#">Kontakt</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-item nav-link" href="#">Ustawienia</a>
+            </li>
+            <li class="nav-item">
+                <form th:action="@{/logout}" method="post">
+                    <input class="btn btn-danger" type="submit" value="Log out">
+                </form>
+            </li>
+        </ul>
+    </div>
+</nav>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    Witaj
+                    <span th:text="${#request.userPrincipal.principal.username}"></span>
+                </div>
+                <div class="col-5">
+                    <h1>Najnowsze oferty</h1>
+                    <hr>
+                    <table id="offers" class="table table-dark">
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col">adv</div>
+            </div>
+        </div>
+</body>
+</html>

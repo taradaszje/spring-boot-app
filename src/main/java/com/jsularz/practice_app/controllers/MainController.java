@@ -6,7 +6,7 @@ import com.jsularz.practice_app.exceptions.UserNotExistsException;
 import com.jsularz.practice_app.models.User;
 import com.jsularz.practice_app.models.VerificationToken;
 import com.jsularz.practice_app.registrationUtill.RegistrationCompleteEvent;
-import com.jsularz.practice_app.services.impl.UserServiceImpl;
+import com.jsularz.practice_app.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.Authentication;
@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -33,13 +34,13 @@ import java.time.LocalDateTime;
 public class MainController {
 
     @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
 
     @GetMapping("/login")
-    private String showLoginForm(Model model) {
+    private String showLoginForm(final Model model) {
         if (!model.containsAttribute("user")) {
             model.addAttribute("user", new UserLoginFormDto());
         }
@@ -51,53 +52,45 @@ public class MainController {
         return "access-denied";
     }
 
-    @PostMapping("/login")
-    private String sendLoginFormData(@ModelAttribute @Valid UserLoginFormDto user, BindingResult result,
-                                     RedirectAttributes redirectAttributes) {
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
-            redirectAttributes.addFlashAttribute("user", user);
-            return "redirect:/login";
-        }
-        return "redirect:/admin/admin";
-    }
-
 
     @PostMapping("/logout")
-    private String logoutPage(HttpServletRequest request, HttpServletResponse response) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    private String logoutPage(final HttpServletRequest request, final HttpServletResponse response) {
+        final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth != null) {
             new SecurityContextLogoutHandler().logout(request, response, auth);
         }
-        return "redirect:/login?logout";//You can redirect wherever you want, but generally it's a good practice to show login screen again.
+        return "redirect:/login?success";
     }
 
     @GetMapping("/register")
-    private String getRegistration(Model model) {
+    private String getRegistration(final Model model) {
         if (!model.containsAttribute("user")) {
             model.addAttribute("user", new UserCreateFormDto());
         }
         return "registration";
     }
 
-    @PostMapping("/register")
-    private String postRegistration(@ModelAttribute @Valid final  UserCreateFormDto user, final BindingResult result,
+    @PostMapping(value = "/register")
+    private String postRegistration( @ModelAttribute @Valid final  UserCreateFormDto user, final BindingResult result,
                                     final RedirectAttributes redirectAttributes, final WebRequest webRequest) {
-        if (result.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
-            redirectAttributes.addFlashAttribute("user", user);
-            return "redirect:/register";
-        }
-        if (userService.emailExist(user.getEmail())) {
-            return "redirect:/register?exist";
-        }
-        final User registered = userService.createNewUserAccount(user);
-
         try {
-            String appUrl = webRequest.getContextPath();
-            eventPublisher.publishEvent(new RegistrationCompleteEvent(registered, webRequest.getLocale(), appUrl));
+            if (result.hasErrors()) {
+                redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.user", result);
+                redirectAttributes.addFlashAttribute("user", user);
+                throw new BindException(result);
+            }
+            if (userService.checkEmailExist(user.getEmail())) {
+                throw new UserNotExistsException("User with email: "+ user.getEmail()+" already exists.");
+            }
+            final User registered = userService.createNewUserAccount(user);
+            final String appUrl = webRequest.getContextPath();
+            eventPublisher.publishEvent(
+                    new RegistrationCompleteEvent(registered, webRequest.getLocale(), appUrl));
             return "redirect:/login?success";
-        } catch (UserNotExistsException e) {
+
+        } catch (UserNotExistsException error) {
+            return "redirect:/register?exists";
+        } catch (BindException error) {
             return "redirect:/register";
         }
     }
@@ -107,22 +100,33 @@ public class MainController {
         return "badUser";
     }
 
-    @GetMapping("/registrationConfirm")
-    private String confirmRegistration(Model model, @RequestParam("token") String token) {
+    @GetMapping("/user/home")
+    private String getUserHome() {
+        return "user/home";
+    }
 
-        VerificationToken verificationToken = userService.getVerificationToken(token);
+
+    @GetMapping("/registrationConfirm")
+    private String confirmRegistration(final Model model, @RequestParam("token")final String token) {
+
+        final VerificationToken verificationToken = userService.getVerificationToken(token);
         if (verificationToken == null) {
             model.addAttribute("message", "Token null");
             return "redirect:/badUser";
         }
-        User user = verificationToken.getUser();
-        LocalDateTime todayTime = LocalDateTime.now();
+        final User user = verificationToken.getUser();
+        final LocalDateTime todayTime = LocalDateTime.now();
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.from(todayTime))) {
             model.addAttribute("message", "Token expired");
             return "redirect:/badUser";
         }
         user.setStatus(true);
-        userService.saveRegisteredUser(user);
+        userService.saveUser(user);
         return "redirect:/login?confirmed";
+    }
+
+    @GetMapping("/user/offer")
+    public String offerView(){
+        return "user/offer";
     }
 }

@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
 
@@ -15,7 +15,7 @@ import javax.sql.DataSource;
 public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    BCryptPasswordEncoder bCryptPasswordEncoder;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Value("${spring.queries.users-query}")
     private String usersQuery;
@@ -36,29 +36,33 @@ public class SecSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Override
+    public void configure(WebSecurity web) {
+        web.ignoring().antMatchers("/resources/**");
+    }
+
+    @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/admin/**").hasAuthority("SITE_USER")
-                .antMatchers("/user/**").hasAuthority("SITE_USER")
-                .antMatchers("/login*").permitAll()
-                .antMatchers("/register").anonymous()
-                .antMatchers("/registrationConfirm").anonymous()
+                .antMatchers("/admin/**").hasAuthority("ADMIN_USER")
+                .antMatchers("/login","/register","/registrationConfirm", "/game", "/resources/static/**").permitAll()
+                .antMatchers("/home/**").hasAuthority("SITE_USER")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login")
                 .loginProcessingUrl("/login")
-                .defaultSuccessUrl("/admin/admin")
+                .successHandler(new AuthenticationSuccessHandlerImpl())
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .failureUrl("/login?error")
+                .permitAll()
                 .and()
                 .logout()
-                .logoutRequestMatcher(
-                        new AntPathRequestMatcher("/login?logout")
-                )
+                .deleteCookies("JSESSIONID","csrftoken")
+                .invalidateHttpSession(true)
                 .logoutSuccessUrl("/login")
+                .logoutSuccessHandler(new LogoutSuccessHandlerImpl()).logoutUrl("/logout")
                 .and()
                 .exceptionHandling().accessDeniedPage("/access-denied");
     }
